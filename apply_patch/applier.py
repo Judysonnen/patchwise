@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from .errors import MalformedDiffError
 from .parser import parse_diff
 
 
@@ -19,10 +20,13 @@ def apply_hunk(file_lines, hunk):
 
 
 def apply_diff(text, root='.'):
-    """apply a unified diff to a working tree. raises ValueError on malformed input."""
+    """apply a unified diff to a working tree.
+
+    raises one of the apply_patch.errors classes on bad input.
+    """
     files = parse_diff(text)
     if not files:
-        raise ValueError("no files found in diff (empty or unrecognized format)")
+        raise MalformedDiffError("no files found in diff (empty or unrecognized format)")
     for f in files:
         p = Path(root) / f['path']
         lines = p.read_text().splitlines()
