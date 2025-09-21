@@ -6,3 +6,4 @@ venv/
 .pytest_cache/
 *.swp
 .DS_Store
+_failure_cases_raw/
