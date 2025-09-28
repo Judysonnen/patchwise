@@ -14,11 +14,17 @@ class MalformedDiffError(ApplyPatchError):
 
 
 class FencedDiffError(ApplyPatchError):
-    """diff appears to be wrapped in markdown fences (```diff ... ```)."""
+    """diff appears to be wrapped in markdown fences (```diff ... ```).
 
-    def __init__(self, fence_marker: str = "```"):
+    `unwrapped` carries the inner diff text so the caller can decide whether
+    to retry the apply with that content (or kick it back to the model and
+    say "drop the fences").
+    """
+
+    def __init__(self, fence_marker: str = "```", unwrapped: str = ""):
         super().__init__(f"diff is wrapped in markdown fences ({fence_marker})")
         self.fence_marker = fence_marker
+        self.unwrapped = unwrapped
 
 
 class LineDriftError(ApplyPatchError):

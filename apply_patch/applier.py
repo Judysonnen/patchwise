@@ -7,8 +7,8 @@ from .parser import parse_diff
 FENCE = re.compile(r'^\s*```(?:diff|patch)?\s*$', re.MULTILINE)
 
 
-def _looks_fenced(text: str) -> bool:
-    """does this text look like a diff wrapped in markdown fences?
+def _extract_fenced(text: str):
+    """if text looks fenced around a diff, return (inner, marker). else None.
 
     we look for at least two ``` fence lines AND a --- header inside the
     fenced region. plain text containing the literal string ``` somewhere
@@ -16,9 +16,12 @@ def _looks_fenced(text: str) -> bool:
     """
     fences = list(FENCE.finditer(text))
     if len(fences) < 2:
-        return False
-    inner = text[fences[0].end(): fences[1].start()]
-    return '\n--- ' in inner or inner.lstrip().startswith('--- ')
+        return None
+    inner = text[fences[0].end(): fences[1].start()].strip('\n')
+    if not ('\n--- ' in inner or inner.lstrip().startswith('--- ')):
+        return None
+    marker = text[fences[0].start(): fences[0].end()].strip()
+    return inner, marker
 
 
 def apply_hunk(file_lines, hunk):
@@ -41,8 +44,10 @@ def apply_diff(text, root='.'):
 
     raises one of the apply_patch.errors classes on bad input.
     """
-    if _looks_fenced(text):
-        raise FencedDiffError()
+    fenced = _extract_fenced(text)
+    if fenced is not None:
+        inner, marker = fenced
+        raise FencedDiffError(fence_marker=marker, unwrapped=inner)
     files = parse_diff(text)
     if not files:
         raise MalformedDiffError("no files found in diff (empty or unrecognized format)")
