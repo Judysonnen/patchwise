@@ -1,0 +1,34 @@
+# fenced markdown wrap
+# claude via claude.ai
+# was adding type hints to click.Context.invoke
+# whole response wrapped in ```diff fences with chatty preamble — apply_patch chokes on the fences
+
+```diff
+--- a/click/core.py
++++ b/click/core.py
+@@ -1,4 +1,9 @@
+-def invoke(self, callback, *args, **kwargs):
++def invoke(
++    self,
++    callback: "t.Callable[..., V] | Command",
++    *args: t.Any,
++    **kwargs: t.Any,
++) -> "V | t.Any":
+     """Invokes a command callback in exactly the way it expects.  There
+     are two ways to invoke this method:
+     
+@@ -22,4 +27,4 @@
+             with ctx:
+                 return callback(*args, **kwargs)
+     
+     with augment_usage_errors(self):
+         return callback(*args, **kwargs)
+```
+
+A few notes on the choices:
+
+- `V` would need to be a `TypeVar` defined at module scope (e.g. `V = t.TypeVar("V")`) so the return type can flow through when a plain callable is passed.
+- The union `t.Callable[..., V] | Command` covers both invocation modes described in the docstring. If you're targeting Python <3.10 without `from __future__ import annotations`, write it as `t.Union[t.Callable[..., V], "Command"]`.
+- The return is `V | t.Any` because the `Command` branch reassigns `callback` via `t.cast` to `t.Callable[..., t.Any]`, so that path widens to `Any`. If you'd rather keep things simple, just annotate the return as `t.Any` — that's what upstream Click actually does.
+
+For reference, upstream Click's current signature is `def invoke(__self, __callback: t.Callable[..., V] | Command, *args: t.Any, **kwargs: t.Any) -> V | t.Any:` with positional-only naming via the dunder prefix to avoid collisions with `**kwargs` keys named `self` or `callback`. Worth considering if you're patching this for real use rather than just learning.
