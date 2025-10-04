@@ -1,0 +1,88 @@
+# task candidates for patchwise eval harness
+# verified existence of each url via web fetch on 2026-05-03
+# every PR below has been individually fetched: confirmed merged status, file count, diff size, and bug description
+# selection: 12 PRs, 6 mechanical/easy + 6 tricky-logic, 2-4 source files each, 14-180 lines diff, no security CVEs
+
+## fastapi/fastapi#14873
+url: https://github.com/fastapi/fastapi/pull/14873
+bug: APIRouter `on_startup` and `on_shutdown` parameters were silently dropped because they were assigned before the parent `__init__` ran and got overwritten.
+files: 2 (fastapi/routing.py, tests/test_router_events.py)
+diff size: ~81 lines (+71/-10)
+difficulty: medium (initialization-ordering logic bug; agent must recognize that parent class init clobbers attributes)
+
+## fastapi/fastapi#14786
+url: https://github.com/fastapi/fastapi/pull/14786
+bug: `get_authorization_scheme_param()` preserved leading/trailing whitespace in credentials, so `"Bearer   xxx"` parsed as `" xxx"` instead of `"xxx"` (RFC 9110 says tokens exclude whitespace).
+files: 3 (fastapi/security/utils.py, tests/test_security_http_base.py, tests/test_security_oauth2_authorization_code_bearer.py)
+diff size: ~14 lines (+13/-1)
+difficulty: easy/mechanical (add `.strip()` in one place; agent must locate the right function)
+
+## fastapi/fastapi#14616
+url: https://github.com/fastapi/fastapi/pull/14616
+bug: Using Pydantic `Json[T]` with `Form()/Query()/Header()/Cookie()` failed because FastAPI treated JSON-typed fields as multi-value sequences and called `getlist()`, wrapping the JSON string in a list before parsing.
+files: 2 (fastapi/dependencies/utils.py, tests/test_json_type.py)
+diff size: ~77 lines (+75/-2)
+difficulty: medium (logic bug; requires detecting Json[T] annotation and choosing get vs getlist on the multidict)
+
+## fastapi/fastapi#14463
+url: https://github.com/fastapi/fastapi/pull/14463
+bug: App-level OpenAPI responses with Union models accumulated duplicate `$ref` entries in `anyOf` because a shallow `.copy()` shared the inner list across routes; multiple route registrations mutated the same object.
+files: 2 (fastapi/openapi/utils.py, tests/test_additional_responses_union_duplicate_anyof.py)
+diff size: ~126 lines (+125/-1; mostly the regression test)
+difficulty: medium (subtle aliasing bug; the one-line fix is `copy.deepcopy` instead of `.copy()` but localizing it requires tracing OpenAPI generation)
+
+## encode/httpx#3116
+url: https://github.com/encode/httpx/pull/3116
+bug: `client.send(request)` ignored the client's configured timeout when given a freshly built `Request` instance — only requests built via `client.build_request()` got the timeout extension applied.
+files: 2 (httpx/_client.py, tests/test_timeouts.py)
+diff size: ~24 lines (+24/-0)
+difficulty: easy/mechanical (add a `_set_timeout` helper and call it from both sync and async send paths)
+
+## pallets/click#3186
+url: https://github.com/pallets/click/pull/3186
+bug: `_termui_impl.open_url()` on Windows shelled out to `start`, but `start` is a cmd builtin that requires `shell=True`, so the call was broken when invoked without a shell.
+files: 2 (CHANGES.rst, src/click/_termui_impl.py)
+diff size: ~22 lines (+12/-10)
+difficulty: easy/mechanical (replace the subprocess invocation of `start` with `os.startfile()` on Windows)
+
+## pallets/click#3152
+url: https://github.com/pallets/click/pull/3152
+bug: Options declared with both `is_flag=False` and an explicit `flag_value=...` were treated as required-value options; they should be optional (zero or one argument), letting the flag value act as the default when present without an arg.
+files: 3 (CHANGES.rst, src/click/core.py, tests/test_options.py)
+diff size: ~61 lines (+58/-3)
+difficulty: medium (logic bug in option-arity inference; need to widen the "is value optional?" check)
+
+## Textualize/rich#3718
+url: https://github.com/Textualize/rich/pull/3718
+bug: `Panel` titles and subtitles rendered without the panel's background style; only the border style was applied to the title row, so titles appeared on the terminal default background instead of the panel background.
+files: 3 (CHANGELOG.md, rich/panel.py, tests/test_panel.py)
+diff size: ~64 lines (+57/-7)
+difficulty: medium (need to combine panel style with border style and apply the merged style to title/subtitle, not just border)
+
+## urllib3/urllib3#4960
+url: https://github.com/urllib3/urllib3/pull/4960
+bug: `HTTPResponse.read(amt=None)` ignored decompressed data buffered from a previous partial read, so a full read after a partial read silently lost bytes.
+files: 3 (changelog/3636.bugfix.rst, src/urllib3/response.py, test/test_response.py)
+diff size: ~37 lines (+37/-0)
+difficulty: medium (state-management logic bug; agent must drain the decompression buffer before falling through to the underlying read)
+
+## python-poetry/poetry#10810
+url: https://github.com/python-poetry/poetry/pull/10810
+bug: Poetry used `str.rstrip(".tar.gz")` to strip archive suffixes, which strips any of those characters individually (so `"pkg-1.0a.tar.gz".rstrip(".tar.gz")` becomes `"pkg-1.0"`, eating the `a` from alpha versions).
+files: 3 (src/poetry/inspection/info.py, src/poetry/installation/chef.py, tests/inspection/test_info.py)
+diff size: ~43 lines (+41/-2)
+difficulty: easy/mechanical (classic `str.rstrip` vs `str.removesuffix` confusion; fix in 2 call sites)
+
+## python-poetry/poetry#10811
+url: https://github.com/python-poetry/poetry/pull/10811
+bug: `poetry show --tree` falsely reported circular dependencies for packages that legitimately appeared as a shared dependency of multiple sibling packages, because the visited-list never popped entries when backtracking out of a subtree.
+files: 2 (src/poetry/console/commands/show.py, tests/console/commands/test_show.py)
+diff size: ~116 lines (+101/-15)
+difficulty: medium-hard (data-structure bug; switch list to set with try/finally backtracking so only true ancestor cycles are flagged)
+
+## psf/requests#6629
+url: https://github.com/psf/requests/pull/6629
+bug: `requests.exceptions.JSONDecodeError` couldn't be unpickled because it inherits from both `requests.RequestException` and `json.JSONDecodeError`, and the default `__reduce__` from one base class produced an args tuple incompatible with the other base's `__init__`.
+files: 2 (src/requests/exceptions.py, tests/test_requests.py)
+diff size: ~20 lines (+20/-0)
+difficulty: medium (multiple-inheritance pickling subtlety; need a custom `__reduce__` returning args matching `JSONDecodeError.__init__`)

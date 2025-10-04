@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-from .errors import FencedDiffError, MalformedDiffError
+from .errors import FencedDiffError, LineDriftError, MalformedDiffError
 from .parser import parse_diff
 
 FENCE = re.compile(r'^\s*```(?:diff|patch)?\s*$', re.MULTILINE)
@@ -22,6 +22,21 @@ def _extract_fenced(text: str):
         return None
     marker = text[fences[0].start(): fences[0].end()].strip()
     return inner, marker
+
+
+def _verify_hunk(file_lines, hunk, path):
+    """check that context and minus lines match the file at the hunk's stated position.
+
+    raises LineDriftError if the @@ -X header points at a region whose content
+    doesn't line up with what the diff expects.
+    """
+    cur = hunk['old_start'] - 1
+    for hl in hunk['lines']:
+        if hl.startswith(' ') or hl.startswith('-'):
+            expected = hl[1:]
+            if cur >= len(file_lines) or file_lines[cur] != expected:
+                raise LineDriftError(path, hunk['old_start'])
+            cur += 1
 
 
 def apply_hunk(file_lines, hunk):
@@ -55,5 +70,6 @@ def apply_diff(text, root='.'):
         p = Path(root) / f['path']
         lines = p.read_text().splitlines()
         for h in reversed(f['hunks']):
+            _verify_hunk(lines, h, f['path'])
             lines = apply_hunk(lines, h)
         p.write_text('\n'.join(lines) + '\n')
