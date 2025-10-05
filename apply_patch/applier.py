@@ -60,7 +60,9 @@ def _try_fuzzy_match(file_lines, hunk):
 
     base = hunk['old_start'] - 1
     lo = max(0, base - WINDOW)
-    hi = min(len(file_lines) - len(expected) + 1, base + WINDOW)
+    # +1 because range is half-open and we want to include the position at
+    # exactly base+WINDOW (the very edge of the window).
+    hi = min(len(file_lines) - len(expected) + 1, base + WINDOW + 1)
     matches = []
     for cand in range(lo, hi):
         if file_lines[cand:cand + len(expected)] == expected:
