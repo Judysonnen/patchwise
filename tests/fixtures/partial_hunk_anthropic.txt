@@ -1,0 +1,37 @@
+# truncated / partial hunk
+# claude via claude.ai
+# asked for diff adding logging to fastapi.get_request_handler with a length cap
+# response cut off mid-hunk — final hunk has no closing context lines
+# applier needs to detect this rather than apply a half-hunk and corrupt the file
+
+```diff
+--- a/fastapi/routing.py
++++ b/fastapi/routing.py
+@@ -17,18 +17,28 @@ def get_request_handler(...):
++    logger.debug("building handler: coroutine=%s form=%s", is_coroutine, is_body_form)
+     async def app(request: Request) -> Response:
++        logger.info("handling %s %s", request.method, request.url.path)
+         response: Union[Response, None] = None
+         async with AsyncExitStack() as file_stack:
+             try:
+                 body: Any = None
+                 if body_field:
++                    logger.debug("body_field present, parsing")
+                     if is_body_form:
+                         body = await request.form()
++                        logger.debug("parsed form, %d fields", len(body))
+                         file_stack.push_async_callback(body.close)
+                     else:
+                         body_bytes = await request.body()
++                        logger.debug("read %d body bytes", len(body_bytes))
+                         if body_bytes:
+                             # ... content-type sniffing (log each branch: no-CT, app/json, +json, fallback)
++                            logger.debug("resolved body kind=%s", type(body).__name__)
+             except json.JSONDecodeError as e:
++                logger.warning("json decode failed at pos=%d", e.pos)
+                 raise validation_error from e
+             except HTTPException:
++                logger.info("HTTPException propagating")
+                 raise
+             except Exception as e:
++                logger.exception("unexpected body parse e

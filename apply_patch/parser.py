@@ -50,7 +50,7 @@ def parse_diff(text):
                 'lines': [],
             }
             i += 1
-            while i + 1 < len(lines) and not lines[i].startswith('@@') \
+            while i < len(lines) and not lines[i].startswith('@@') \
                     and not lines[i].startswith('--- ') \
                     and not GIT_HEADER.match(lines[i]):
                 hunk['lines'].append(lines[i])

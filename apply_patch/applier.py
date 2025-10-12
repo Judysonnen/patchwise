@@ -127,11 +127,16 @@ def apply_diff(text, root='.', warnings=None):
     files = parse_diff(text)
     if not files:
         raise MalformedDiffError("no files found in diff (empty or unrecognized format)")
+    # pre-validate every hunk's structural completeness before touching any file.
+    # otherwise a truncated diff for path/that/does/not/exist crashes with
+    # FileNotFoundError instead of the more informative PartialHunkError.
+    for f in files:
+        for h in f['hunks']:
+            _check_complete(h, f['path'])
     for f in files:
         p = Path(root) / f['path']
         lines = p.read_text().splitlines()
         for h in reversed(f['hunks']):
-            _check_complete(h, f['path'])
             try:
                 _verify_hunk(lines, h, f['path'])
             except LineDriftError:
