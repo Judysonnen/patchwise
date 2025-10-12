@@ -1,7 +1,12 @@
 import re
 from pathlib import Path
 
-from .errors import FencedDiffError, LineDriftError, MalformedDiffError
+from .errors import (
+    FencedDiffError,
+    LineDriftError,
+    MalformedDiffError,
+    PartialHunkError,
+)
 from .parser import parse_diff
 
 FENCE = re.compile(r'^\s*```(?:diff|patch)?\s*$', re.MULTILINE)
@@ -27,6 +32,27 @@ def _extract_fenced(text: str):
         return None
     marker = text[fences[0].start(): fences[0].end()].strip()
     return inner, marker
+
+
+def _check_complete(hunk, path):
+    """raise PartialHunkError if the hunk body doesn't match its declared counts.
+
+    catches the case where the model's response was truncated mid-hunk: the
+    @@ header says "+28 new lines" but only 26 actually arrived. without this
+    check we'd silently apply a half-hunk and corrupt the file.
+    """
+    old_lines = sum(1 for hl in hunk['lines'] if hl.startswith(' ') or hl.startswith('-'))
+    new_lines = sum(1 for hl in hunk['lines'] if hl.startswith(' ') or hl.startswith('+'))
+    if old_lines < hunk['old_count']:
+        raise PartialHunkError(
+            path, hunk['old_start'],
+            f"declared {hunk['old_count']} old lines, got {old_lines}",
+        )
+    if new_lines < hunk['new_count']:
+        raise PartialHunkError(
+            path, hunk['old_start'],
+            f"declared {hunk['new_count']} new lines, got {new_lines}",
+        )
 
 
 def _verify_hunk(file_lines, hunk, path):
@@ -105,6 +131,7 @@ def apply_diff(text, root='.', warnings=None):
         p = Path(root) / f['path']
         lines = p.read_text().splitlines()
         for h in reversed(f['hunks']):
+            _check_complete(h, f['path'])
             try:
                 _verify_hunk(lines, h, f['path'])
             except LineDriftError:

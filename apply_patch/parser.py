@@ -1,6 +1,6 @@
 import re
 
-HUNK = re.compile(r'^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@')
+HUNK = re.compile(r'^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@')
 GIT_HEADER = re.compile(r'^diff --git a/(\S+) b/(\S+)')
 
 # TODO: this whole thing is one big ad-hoc state machine. should probably
@@ -41,9 +41,16 @@ def parse_diff(text):
 
         m = HUNK.match(line)
         if m and current is not None:
-            hunk = {'old_start': int(m.group(1)), 'lines': []}
+            old_count = int(m.group(2)) if m.group(2) else 1
+            new_count = int(m.group(4)) if m.group(4) else 1
+            hunk = {
+                'old_start': int(m.group(1)),
+                'old_count': old_count,
+                'new_count': new_count,
+                'lines': [],
+            }
             i += 1
-            while i < len(lines) and not lines[i].startswith('@@') \
+            while i + 1 < len(lines) and not lines[i].startswith('@@') \
                     and not lines[i].startswith('--- ') \
                     and not GIT_HEADER.match(lines[i]):
                 hunk['lines'].append(lines[i])
