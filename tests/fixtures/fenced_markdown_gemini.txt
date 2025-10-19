@@ -1,0 +1,40 @@
+# fenced markdown wrap, gemini version  
+# gemini
+# adding timeout param to httpx async client send
+# gemini's fence style is different again, sometimes uses ~~~ instead of ``` weirdly
+
+Here is the unified diff adding the `timeout` parameter with the requested type annotations and the `UseClientDefault` resolution pattern.
+
+```diff
+--- a/client.py
++++ b/client.py
+@@ -4,14 +4,20 @@
+     *,
+     stream: bool = False,
+     auth: typing.Union[AuthTypes, UseClientDefault, None] = USE_CLIENT_DEFAULT,
+     follow_redirects: typing.Union[bool, UseClientDefault] = USE_CLIENT_DEFAULT,
++    timeout: typing.Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
+ ) -> Response:
+     if self._state == ClientState.CLOSED:
+         raise RuntimeError("Cannot send a request, as the client has been closed.")
+     self._state = ClientState.OPENED
+     follow_redirects = (
+         self.follow_redirects
+         if isinstance(follow_redirects, UseClientDefault)
+         else follow_redirects
+     )
++    timeout = (
++        self.timeout
++        if isinstance(timeout, UseClientDefault)
++        else timeout
++    )
+     auth = self._build_request_auth(request, auth)
+     response = await self._send_handling_auth(
+         request,
+         auth=auth,
+         follow_redirects=follow_redirects,
+         history=[],
++        timeout=timeout,
+     )
+     return response
+```

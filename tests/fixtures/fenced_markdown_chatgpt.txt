@@ -1,0 +1,28 @@
+# fenced markdown wrap, chatgpt version
+# gpt via chatgpt web
+# adding docstring to requests.Session.merge_environment_settings
+# different fence style than claude, also added explanation paragraphs around the diff
+
+Sure — here's a unified diff that adds a short docstring to `merge_environment_settings`. I tried to keep it consistent with the docstring style used elsewhere in `requests/sessions.py` (one-line summary, blank line, then the precedence note):
+
+```diff
+--- a/requests/sessions.py
++++ b/requests/sessions.py
+@@ -1,6 +1,11 @@
+ def merge_environment_settings(self, url, proxies, stream, verify, cert):
+-    """Check the environment and merge it with some settings."""
++    """Check the environment and merge it with some settings.
++
++    Request-level settings take precedence over session-level settings.
++    When a request setting is not provided, the corresponding session-level
++    setting is used instead.
++    """
+     # Gather clues from the surrounding environment.
+     if self.trust_env:
+         no_proxy = proxies.get("no_proxy") if proxies is not None else None
+```
+
+A couple of notes:
+
+- The precedence wording mirrors what's already implied by the existing logic (env vars only fill in when the per-request value is `None`), so this is documentation-only — no behavior change.
+- If you'd rather phrase it from the caller's perspective ("returns a merged settings dict where request-level values win"), that's a one-line tweak. Let me know which framing you prefer and I'll regenerate.
