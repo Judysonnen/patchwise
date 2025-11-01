@@ -65,8 +65,14 @@ class DockerSandbox:
     def stop(self) -> None:
         if not self._started:
             return
+        # always force-remove on stop. running containers from interrupted
+        # ablation runs were piling up in `docker ps -a`.
         subprocess.run(["docker", "rm", "-f", self._name], capture_output=True)
         self._started = False
+
+    @property
+    def container_name(self) -> str:
+        return self._name
 
     def __enter__(self):
         self.start()
