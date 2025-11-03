@@ -29,3 +29,12 @@ def test_run_cmd_uses_specified_image(tmp_path):
     sb = DockerSandbox(image="python:3.11-slim", mount_root=tmp_path)
     cmd = sb._build_run_cmd()
     assert "python:3.11-slim" in cmd
+
+
+def test_run_cmd_isolates_network(tmp_path):
+    """regression: forgot --network=none in the first cut. without it the
+    sandbox can `pip install` arbitrary packages mid-run."""
+    sb = DockerSandbox(image="python:3.11-slim", mount_root=tmp_path)
+    cmd = sb._build_run_cmd()
+    assert "--network" in cmd
+    assert cmd[cmd.index("--network") + 1] == "none"

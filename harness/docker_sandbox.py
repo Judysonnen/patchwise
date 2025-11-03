@@ -33,6 +33,10 @@ class DockerSandbox:
         return [
             "docker", "run", "-d",
             "--name", self._name,
+            # NO NETWORK. confirmed by accident that without this the agent's
+            # tools could `pip install` arbitrary packages mid-run, defeating
+            # the sandbox. found by curl-ing example.com from inside.
+            "--network", "none",
             "--memory", f"{self.memory_mb}m",
             "-v", f"{self.mount_root}:/workspace",
             "-w", "/workspace",
