@@ -18,3 +18,9 @@ eval = [
 
 [tool.setuptools.packages.find]
 include = ["apply_patch*", "harness*"]
+
+[tool.pytest.ini_options]
+# fixture test files (harness/tasks/*/tests/) import upstream packages like
+# `rich`, `requests`, etc. that aren't installed locally — they're meant to
+# be applied INTO a cloned upstream repo at eval time, not collected here.
+testpaths = ["tests"]

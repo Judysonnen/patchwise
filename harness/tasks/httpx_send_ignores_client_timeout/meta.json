@@ -1,0 +1,16 @@
+{
+  "url": "https://github.com/encode/httpx/pull/3116",
+  "repo": "encode/httpx",
+  "pr_number": 3116,
+  "base_sha": "df5345140e09ac6c2de0d9589bcd6f3e31c6aa3f",
+  "source_files": [
+    "httpx/_client.py"
+  ],
+  "test_files": [
+    "tests/test_timeouts.py"
+  ],
+  "summary": "client.send() loses configured timeout when given a raw Request",
+  "test_command": "pytest tests/test_timeouts.py -k test_async_client_new_request_send_timeout -v",
+  "difficulty": "easy",
+  "multi_file": false
+}

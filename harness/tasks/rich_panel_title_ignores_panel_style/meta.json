@@ -1,0 +1,16 @@
+{
+  "url": "https://github.com/Textualize/rich/pull/3718",
+  "repo": "Textualize/rich",
+  "pr_number": 3718,
+  "base_sha": "7d36119f8378b36129502c3281a7faffef837e02",
+  "source_files": [
+    "rich/panel.py"
+  ],
+  "test_files": [
+    "tests/test_panel.py"
+  ],
+  "summary": "Panel title and subtitle render without the panel's background style",
+  "test_command": "pytest tests/test_panel.py -k 'test_title_text_with_border_color or test_title_text_with_panel_background' -v",
+  "difficulty": "medium",
+  "multi_file": false
+}

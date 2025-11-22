@@ -1,0 +1,16 @@
+{
+  "url": "https://github.com/pallets/click/pull/3152",
+  "repo": "pallets/click",
+  "pr_number": 3152,
+  "base_sha": "7f7bbe4569ea68e8dabee232eade069ef3310aea",
+  "source_files": [
+    "src/click/core.py"
+  ],
+  "test_files": [
+    "tests/test_options.py"
+  ],
+  "summary": "options with explicit flag_value still demand a required argument",
+  "test_command": "pytest tests/test_options.py -k test_flag_value_on_option_with_zero_or_one_args -v",
+  "difficulty": "medium",
+  "multi_file": false
+}

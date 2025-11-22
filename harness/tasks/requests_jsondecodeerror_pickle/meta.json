@@ -1,0 +1,16 @@
+{
+  "url": "https://github.com/psf/requests/pull/6629",
+  "repo": "psf/requests",
+  "pr_number": 6629,
+  "base_sha": "7a13c041dbef42f9f3feb14110f02626f6892e9a",
+  "source_files": [
+    "src/requests/exceptions.py"
+  ],
+  "test_files": [
+    "tests/test_requests.py"
+  ],
+  "summary": "JSONDecodeError loses inheritance and can't be unpickled",
+  "test_command": "pytest tests/test_requests.py -k test_json_decode_errors_are_serializable_deserializable -v",
+  "difficulty": "medium",
+  "multi_file": false
+}
