@@ -65,7 +65,9 @@ def main() -> int:
                     help="comma-separated model names")
     ap.add_argument("--trials", type=int, default=3)
     ap.add_argument("--trace-db", default="trace.sqlite")
-    ap.add_argument("--max-steps", type=int, default=25)
+    # max-steps used to be 25 — got into runaway loops where the model just
+    # kept re-reading files. 15 is plenty for these task fixtures.
+    ap.add_argument("--max-steps", type=int, default=15)
     ap.add_argument("--dry-run", action="store_true",
                     help="print planned trajectories then exit (no API calls)")
     args = ap.parse_args()
