@@ -8,6 +8,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -35,6 +36,14 @@ def ensure_clone(repo: str) -> Path:
     subprocess.run(
         ["git", "clone", "--quiet", url, str(target)],
         check=True, capture_output=True, text=True,
+    )
+    # TODO this is a hack — pytest will ImportError on `import requests` etc.
+    # if the upstream package isn't installed in our env. install it now so
+    # tests can at least find the module. doesn't handle [test] extras yet,
+    # so async-test plugins etc. are still missing. clean this up.
+    subprocess.run(
+        [sys.executable, "-m", "pip", "install", "-q", "-e", str(target)],
+        capture_output=True,
     )
     return target
 
