@@ -78,9 +78,12 @@ def test_runner_records_trace_events_and_invokes_tools(tmp_path):
 
     # patch the runner's repo provisioning to point at our synthetic dir
     import harness.runner as runner_mod
-    orig_clone, orig_checkout = runner_mod.ensure_clone, runner_mod.checkout
+    orig_clone = runner_mod.ensure_clone
+    orig_checkout = runner_mod.checkout
+    orig_install = runner_mod.ensure_installed
     runner_mod.ensure_clone = lambda repo: workspace
     runner_mod.checkout = lambda path, sha: None
+    runner_mod.ensure_installed = lambda repo, sha, path: ""
     try:
         diff = (
             "--- a/x.py\n"
@@ -100,7 +103,9 @@ def test_runner_records_trace_events_and_invokes_tools(tmp_path):
         )
         result = runner.run("traj-1")
     finally:
-        runner_mod.ensure_clone, runner_mod.checkout = orig_clone, orig_checkout
+        runner_mod.ensure_clone = orig_clone
+        runner_mod.checkout = orig_checkout
+        runner_mod.ensure_installed = orig_install
         trace.close()
 
     # patch was applied, the fake test_command 'true' returned 0, so success
@@ -146,9 +151,12 @@ def test_runner_records_failure_when_tests_fail(tmp_path):
     trace = TraceStore(db)
 
     import harness.runner as runner_mod
-    orig_clone, orig_checkout = runner_mod.ensure_clone, runner_mod.checkout
+    orig_clone = runner_mod.ensure_clone
+    orig_checkout = runner_mod.checkout
+    orig_install = runner_mod.ensure_installed
     runner_mod.ensure_clone = lambda repo: workspace
     runner_mod.checkout = lambda path, sha: None
+    runner_mod.ensure_installed = lambda repo, sha, path: ""
     try:
         runner = Runner(
             task=task,
@@ -162,7 +170,9 @@ def test_runner_records_failure_when_tests_fail(tmp_path):
         )
         result = runner.run("traj-fail")
     finally:
-        runner_mod.ensure_clone, runner_mod.checkout = orig_clone, orig_checkout
+        runner_mod.ensure_clone = orig_clone
+        runner_mod.checkout = orig_checkout
+        runner_mod.ensure_installed = orig_install
         trace.close()
 
     assert result.success is False
