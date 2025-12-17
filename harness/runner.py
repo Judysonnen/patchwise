@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Callable
 
 from .model_client import ModelClient
-from .repo_cache import checkout, ensure_clone
+from .repo_cache import checkout, ensure_clone, ensure_installed
 from .task import Task
 from .tools import TOOLS, make_dispatch
 from .trace_store import TraceStore
@@ -78,6 +78,10 @@ class Runner:
     def run(self, trajectory_id: str) -> TaskResult:
         repo_path = ensure_clone(self.task.repo)
         checkout(repo_path, self.task.base_sha)
+        # install the upstream package so pytest can `import requests` etc.
+        # idempotent across trajectories of the same task; only does real
+        # pip work the first time we see this (repo, sha).
+        ensure_installed(self.task.repo, self.task.base_sha, repo_path)
         _apply_test_files(repo_path, self.task)
 
         dispatch = make_dispatch(repo_path, self.task.test_command, self.apply_patch_variant)
