@@ -98,7 +98,13 @@ class Runner:
                 max_steps=self.max_steps,
             )
         except Exception as e:
-            scaffold_error = f"{type(e).__name__}: {e}"
+            scaffold_error = f"{type(e).__name__}: {str(e)[:500]}"
+            # also append a top-level error event so the analyzer doesn't have
+            # to re-derive this from the (missing) completion event
+            self.trace.append(
+                trajectory_id, 0, "scaffold_error",
+                {"type": type(e).__name__, "msg": str(e)[:500], "model": self.model.name},
+            )
 
         # count steps from the trace (events with positive step number, of type "completion")
         for ev in self.trace.replay_prefix(trajectory_id, up_to_step=10_000):

@@ -9,10 +9,15 @@ usage:
     client = OpenAIClient("gpt-4o-mini")    # needs OPENAI_API_KEY
     client = AnthropicClient("claude-haiku-4-5")  # needs ANTHROPIC_API_KEY
     completion = client.complete(messages, tools=[...])
+
+both clients retry transient errors (rate limit, transient 5xx, network drop)
+with exponential backoff. persistent failures raise.
 """
 from __future__ import annotations
 
 import json
+import random
+import time
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -57,6 +62,34 @@ class ModelClient(Protocol):
 
 
 # ---------------------------------------------------------------------------
+# retry helper — used by both clients
+# ---------------------------------------------------------------------------
+
+
+_MAX_ATTEMPTS = 5
+_BASE_DELAY = 2.0   # seconds
+_MAX_DELAY = 30.0
+
+
+def _retry(call, is_retryable):
+    """call `call()` up to _MAX_ATTEMPTS times, retrying when is_retryable(exc) is True.
+
+    backoff is exponential with jitter. raises the last exception on failure.
+    """
+    last_exc = None
+    for attempt in range(_MAX_ATTEMPTS):
+        try:
+            return call()
+        except Exception as e:
+            last_exc = e
+            if not is_retryable(e):
+                raise
+            delay = min(_MAX_DELAY, _BASE_DELAY * (2 ** attempt)) * (0.5 + random.random())
+            time.sleep(delay)
+    raise last_exc  # type: ignore[misc]
+
+
+# ---------------------------------------------------------------------------
 # OpenAI
 # ---------------------------------------------------------------------------
 
@@ -89,11 +122,27 @@ class OpenAIClient:
                 }
                 for t in tools
             ]
-        resp = self._client.chat.completions.create(
-            model=self.name,
-            messages=oai_messages,
-            tools=oai_tools,
+        from openai import (
+            APIConnectionError as _APIConnectionError,
+            APITimeoutError as _APITimeoutError,
+            InternalServerError as _InternalServerError,
+            RateLimitError as _RateLimitError,
         )
+
+        def _do_call():
+            return self._client.chat.completions.create(
+                model=self.name,
+                messages=oai_messages,
+                tools=oai_tools,
+            )
+
+        def _retryable(e: Exception) -> bool:
+            return isinstance(
+                e,
+                (_RateLimitError, _APIConnectionError, _APITimeoutError, _InternalServerError),
+            )
+
+        resp = _retry(_do_call, _retryable)
         choice = resp.choices[0].message
         tool_calls = []
         for tc in (choice.tool_calls or []):
@@ -169,7 +218,23 @@ class AnthropicClient:
         if ant_tools:
             kwargs["tools"] = ant_tools
 
-        resp = self._client.messages.create(**kwargs)
+        from anthropic import (
+            APIConnectionError as _APIConnectionError,
+            APITimeoutError as _APITimeoutError,
+            InternalServerError as _InternalServerError,
+            RateLimitError as _RateLimitError,
+        )
+
+        def _do_call():
+            return self._client.messages.create(**kwargs)
+
+        def _retryable(e: Exception) -> bool:
+            return isinstance(
+                e,
+                (_RateLimitError, _APIConnectionError, _APITimeoutError, _InternalServerError),
+            )
+
+        resp = _retry(_do_call, _retryable)
 
         text_parts = []
         tool_calls = []

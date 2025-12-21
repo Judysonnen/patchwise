@@ -64,3 +64,42 @@ def test_anthropic_translates_assistant_tool_use_block():
     types = [b["type"] for b in out["content"]]
     assert types == ["text", "tool_use"]
     assert out["content"][1]["input"] == {"path": "x.py"}
+
+
+def test_retry_helper_retries_then_succeeds(monkeypatch):
+    """_retry should call until the predicate says stop. verify it retries
+    on a marked exception and eventually returns the success value."""
+    import harness.model_client as mc
+    # neuter the sleep so the test runs fast
+    monkeypatch.setattr(mc.time, "sleep", lambda s: None)
+
+    calls = {"n": 0}
+
+    class FakeRateLimit(Exception):
+        pass
+
+    def flaky():
+        calls["n"] += 1
+        if calls["n"] < 3:
+            raise FakeRateLimit("slow down")
+        return "ok"
+
+    out = mc._retry(flaky, lambda e: isinstance(e, FakeRateLimit))
+    assert out == "ok"
+    assert calls["n"] == 3
+
+
+def test_retry_helper_reraises_non_retryable_immediately(monkeypatch):
+    import harness.model_client as mc
+    monkeypatch.setattr(mc.time, "sleep", lambda s: None)
+
+    calls = {"n": 0}
+
+    def boom():
+        calls["n"] += 1
+        raise ValueError("not retryable")
+
+    import pytest
+    with pytest.raises(ValueError):
+        mc._retry(boom, lambda e: isinstance(e, KeyError))
+    assert calls["n"] == 1
