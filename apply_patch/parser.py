@@ -53,7 +53,15 @@ def parse_diff(text):
             while i < len(lines) and not lines[i].startswith('@@') \
                     and not lines[i].startswith('--- ') \
                     and not GIT_HEADER.match(lines[i]):
-                hunk['lines'].append(lines[i])
+                # bare empty lines in a hunk body are blank context lines
+                # that lost their leading space (LLMs and editors strip
+                # trailing whitespace). normalize to ' ' here so the rest
+                # of the pipeline (count check, drift verify, apply) sees
+                # them as context.
+                body_line = lines[i]
+                if body_line == '':
+                    body_line = ' '
+                hunk['lines'].append(body_line)
                 i += 1
             current['hunks'].append(hunk)
             continue
