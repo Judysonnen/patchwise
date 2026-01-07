@@ -9,8 +9,10 @@ steps:
 """
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
@@ -46,11 +48,24 @@ def _apply_test_files(repo_path: Path, task: Task) -> None:
         shutil.copy2(src, dst)
 
 
+def _test_env() -> dict:
+    """make sure the python that runs this harness is the same python that
+    `pytest` resolves to in the test_command shell. otherwise upstream
+    package's pytest isn't found and every test_command exits 127."""
+    env = dict(os.environ)
+    # do NOT .resolve() — venv pythons are symlinks to the system python; if
+    # we follow the symlink we lose the venv bin.
+    venv_bin = str(Path(sys.executable).parent)
+    env["PATH"] = venv_bin + os.pathsep + env.get("PATH", "")
+    return env
+
+
 def _run_test_command(repo_path: Path, command: str, timeout: int = 180) -> tuple[bool, str]:
     try:
         result = subprocess.run(
             command, shell=True, cwd=repo_path,
             capture_output=True, text=True, timeout=timeout,
+            env=_test_env(),
         )
     except subprocess.TimeoutExpired:
         return False, "test command timed out"

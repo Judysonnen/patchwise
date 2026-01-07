@@ -11,10 +11,20 @@ swapping them across runs is what isolates the "tool layer" lever in the eval.
 """
 from __future__ import annotations
 
+import os
 import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Callable
+
+
+def _shell_env_with_venv() -> dict:
+    """see runner._test_env — same reason. don't .resolve() the python path."""
+    env = dict(os.environ)
+    venv_bin = str(Path(sys.executable).parent)
+    env["PATH"] = venv_bin + os.pathsep + env.get("PATH", "")
+    return env
 
 from apply_patch import apply_diff as tolerant_apply_diff
 from apply_patch.errors import ApplyPatchError
@@ -215,6 +225,7 @@ def _run_tests(workspace: Path, test_command: str, timeout: int = 120) -> str:
         result = subprocess.run(
             test_command, shell=True, cwd=workspace,
             capture_output=True, text=True, timeout=timeout,
+            env=_shell_env_with_venv(),
         )
     except subprocess.TimeoutExpired:
         return "error: test command timed out"
