@@ -7,3 +7,4 @@ venv/
 *.swp
 .DS_Store
 _failure_cases_raw/
+trace*.sqlite*
