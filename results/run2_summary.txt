@@ -1,0 +1,53 @@
+loaded 64 trajectories from trace_run2.sqlite
+
+## solve rate by variant
+variant               pass total     pct
+naive_planner            1    16    6.2%
+naive_react              2    16   12.5%
+tolerant_planner         3    16   18.8%
+tolerant_react           2    16   12.5%
+
+## solve rate by (variant, model)
+variant              model                   pass total     pct
+naive_planner        claude-haiku-4-5           1     8   12.5%
+naive_planner        gpt-4o-mini                0     8    0.0%
+naive_react          claude-haiku-4-5           0     8    0.0%
+naive_react          gpt-4o-mini                2     8   25.0%
+tolerant_planner     claude-haiku-4-5           3     8   37.5%
+tolerant_planner     gpt-4o-mini                0     8    0.0%
+tolerant_react       claude-haiku-4-5           2     8   25.0%
+tolerant_react       gpt-4o-mini                0     8    0.0%
+
+## solve rate per (task, variant) -- counts pass/total
+task                                                    naive_planner          naive_react     tolerant_planner       tolerant_react
+click_flag_value_option_arity                      0/4                  1/4                  0/4                  0/4               
+httpx_send_ignores_client_timeout                  0/4                  0/4                  0/4                  0/4               
+requests_jsondecodeerror_pickle                    1/4                  0/4                  1/4                  2/4               
+rich_panel_title_ignores_panel_style               0/4                  1/4                  2/4                  0/4               
+
+## tool calls per trajectory (mean, by variant)
+variant                 mean  median   max
+naive_planner           16.6      20    20
+naive_react             17.2      20    20
+tolerant_planner        17.2      20    20
+tolerant_react          17.2      20    20
+
+## apply_patch errors by variant (what the tool layer caught)
+  naive_planner (9 total):
+    MalformedDiff                  9
+  naive_react (6 total):
+    IndexError                     5
+    MalformedDiff                  1
+  tolerant_planner (64 total):
+    PartialHunkError               41
+    LineDriftError                 23
+  tolerant_react (63 total):
+    PartialHunkError               37
+    LineDriftError                 26
+
+## scaffold by task type (planner vs react, multi-file vs single)
+scaffold   task type   pass total     pct
+react      single         4    32   12.5%
+react      multi          0     0     -  
+planner    single         4    32   12.5%
+planner    multi          0     0     -  
