@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/fastapi/fastapi/pull/14786",
+  "repo": "fastapi/fastapi",
+  "pr_number": 14786,
+  "base_sha": "eacbce24c9d299c6a28110d9fc8ac50f53cddb08",
+  "source_files": [
+    "fastapi/security/utils.py"
+  ],
+  "test_files": [
+    "tests/test_security_http_base.py",
+    "tests/test_security_oauth2_authorization_code_bearer.py"
+  ],
+  "summary": "get_authorization_scheme_param keeps whitespace inside credentials",
+  "test_command": "pytest tests/test_security_http_base.py tests/test_security_oauth2_authorization_code_bearer.py -k 'test_security_http_base_with_whitespaces or test_token_with_whitespaces' -v",
+  "difficulty": "easy",
+  "multi_file": false
+}

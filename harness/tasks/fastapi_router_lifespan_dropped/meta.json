@@ -1,0 +1,16 @@
+{
+  "url": "https://github.com/fastapi/fastapi/pull/14873",
+  "repo": "fastapi/fastapi",
+  "pr_number": 14873,
+  "base_sha": "cd31576d5704b6aef1bdadc43770238cd88aad2b",
+  "source_files": [
+    "fastapi/routing.py"
+  ],
+  "test_files": [
+    "tests/test_router_events.py"
+  ],
+  "summary": "APIRouter on_startup/on_shutdown silently dropped by parent __init__",
+  "test_command": "pytest tests/test_router_events.py -k test_startup_shutdown_handlers_as_parameters -v",
+  "difficulty": "medium",
+  "multi_file": false
+}

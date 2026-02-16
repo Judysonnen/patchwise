@@ -1,0 +1,16 @@
+{
+  "url": "https://github.com/fastapi/fastapi/pull/14463",
+  "repo": "fastapi/fastapi",
+  "pr_number": 14463,
+  "base_sha": "f2687dc1bb01f4cb62eee90e656b61c38c2aaf6a",
+  "source_files": [
+    "fastapi/openapi/utils.py"
+  ],
+  "test_files": [
+    "tests/test_additional_responses_union_duplicate_anyof.py"
+  ],
+  "summary": "OpenAPI Union responses accumulate duplicate $ref entries",
+  "test_command": "pytest tests/test_additional_responses_union_duplicate_anyof.py -k test_openapi_schema -v",
+  "difficulty": "medium",
+  "multi_file": false
+}

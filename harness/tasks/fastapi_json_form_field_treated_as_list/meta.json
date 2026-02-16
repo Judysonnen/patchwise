@@ -1,0 +1,16 @@
+{
+  "url": "https://github.com/fastapi/fastapi/pull/14616",
+  "repo": "fastapi/fastapi",
+  "pr_number": 14616,
+  "base_sha": "54f8aeeb9a15e4d5a12401ec5549840966df0087",
+  "source_files": [
+    "fastapi/dependencies/utils.py"
+  ],
+  "test_files": [
+    "tests/test_json_type.py"
+  ],
+  "summary": "Json[T] in Form/Query/Header/Cookie wrapped in list before parsing",
+  "test_command": "pytest tests/test_json_type.py -k 'test_form_json_list or test_query_json_list or test_header_json_list or test_cookie_json_list' -v",
+  "difficulty": "medium",
+  "multi_file": false
+}
