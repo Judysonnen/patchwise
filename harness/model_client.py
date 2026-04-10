@@ -66,9 +66,9 @@ class ModelClient(Protocol):
 # ---------------------------------------------------------------------------
 
 
-_MAX_ATTEMPTS = 5
+_MAX_ATTEMPTS = 3   # was 5 — saw a trajectory burn 6 min on rate-limit retries during the eval. 3 is enough.
 _BASE_DELAY = 2.0   # seconds
-_MAX_DELAY = 30.0
+_MAX_DELAY = 20.0   # was 30, see above
 
 
 def _retry(call, is_retryable):
