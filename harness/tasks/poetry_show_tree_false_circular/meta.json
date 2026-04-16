@@ -1,0 +1,16 @@
+{
+  "url": "https://github.com/python-poetry/poetry/pull/10811",
+  "repo": "python-poetry/poetry",
+  "pr_number": 10811,
+  "base_sha": "3f7feee6985853ee3bda6c92465273738a94b628",
+  "source_files": [
+    "src/poetry/console/commands/show.py"
+  ],
+  "test_files": [
+    "tests/console/commands/test_show.py"
+  ],
+  "summary": "show --tree falsely flags shared deps as circular",
+  "test_command": "pytest tests/console/commands/test_show.py -k test_show_tree_shared_dependency_not_marked_circular -v",
+  "difficulty": "hard",
+  "multi_file": false
+}

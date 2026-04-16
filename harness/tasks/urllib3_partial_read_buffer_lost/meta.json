@@ -1,0 +1,16 @@
+{
+  "url": "https://github.com/urllib3/urllib3/pull/4960",
+  "repo": "urllib3/urllib3",
+  "pr_number": 4960,
+  "base_sha": "c21b1c16cd8c08dd26876e223bc198a2b4de4fb3",
+  "source_files": [
+    "src/urllib3/response.py"
+  ],
+  "test_files": [
+    "test/test_response.py"
+  ],
+  "summary": "HTTPResponse.read(amt=None) loses decompression buffer after partial read",
+  "test_command": "pytest test/test_response.py -k 'test_full_read_after_partial_read_with_buffered_decoded_data or test_full_read_after_partial_read_without_buffered_decoded_data' -v",
+  "difficulty": "medium",
+  "multi_file": false
+}

@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/encode/httpx/pull/2998",
+  "repo": "encode/httpx",
+  "pr_number": 2998,
+  "base_sha": "90538a3b4610ba49ce16c997bcfdb9101f9503be",
+  "source_files": [
+    "httpx/_decoders.py",
+    "httpx/_models.py"
+  ],
+  "test_files": [
+    "tests/test_decoders.py"
+  ],
+  "summary": "iter_text() emits empty strings for chunks that decode to empty",
+  "test_command": "pytest tests/test_decoders.py -k test_streaming_text_decoder -v",
+  "difficulty": "medium",
+  "multi_file": true
+}

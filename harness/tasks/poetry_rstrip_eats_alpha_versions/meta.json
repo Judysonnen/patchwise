@@ -1,0 +1,17 @@
+{
+  "url": "https://github.com/python-poetry/poetry/pull/10810",
+  "repo": "python-poetry/poetry",
+  "pr_number": 10810,
+  "base_sha": "89aaee9d60cae20775d3c40e4f243f9945f718e1",
+  "source_files": [
+    "src/poetry/inspection/info.py",
+    "src/poetry/installation/chef.py"
+  ],
+  "test_files": [
+    "tests/inspection/test_info.py"
+  ],
+  "summary": "rstrip('.tar.gz') eats alpha-version letters",
+  "test_command": "pytest tests/inspection/test_info.py -k test_info_from_sdist_name_ending_in_suffix_chars -v",
+  "difficulty": "easy",
+  "multi_file": true
+}
