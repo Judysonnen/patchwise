@@ -67,12 +67,16 @@ class TraceStore:
             (trajectory_id, up_to_step),
         )
         for row in cur:
-            yield {
-                "step": row[0],
-                "event_type": row[1],
-                "payload": json.loads(row[2]),
-                "ts": row[3],
-            }
+            yield self._row_to_event(row)
+
+    @staticmethod
+    def _row_to_event(row: tuple) -> dict:
+        return {
+            "step": row[0],
+            "event_type": row[1],
+            "payload": json.loads(row[2]),
+            "ts": row[3],
+        }
 
     def trajectories(self) -> list[str]:
         cur = self._conn.execute(
