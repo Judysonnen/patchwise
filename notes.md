@@ -11,10 +11,9 @@ textbook case, nothing else. felt smug for about 6 days.
 
 ## sept 28
 
-fenced markdown thing happens like 40% of the time with claude. less with
-codex CLI (~15%? haven't measured properly). gpt sits somewhere in between.
-the failure mode is so consistent across providers it should probably just
-be normalized at the system-prompt layer, but here we are.
+damn it, fenced markdown again. claude does it ~40% of the time, codex CLI
+maybe 15%, gpt somewhere in between. so consistent across providers it
+should just be normalized at the system-prompt layer. but here we are.
 
 ## oct 5
 
@@ -32,12 +31,16 @@ will sometimes get drift even with a perfect prompt.
 
 ## nov 3
 
-should probably try this with reasoning models. hypothesis: o1/o3 makes way
-fewer of these mundane mistakes so the applier matters less. would be a real
-result either way — either the applier is doing real work that matters
-regardless of model class, or it's papering over a mini-model failure mode
-that the next model generation kills. gpt-4o-mini and claude-haiku are the
-right models to test the floor; reasoning models would test the ceiling.
+questions for future me: why does claude wrap diffs in ```diff fences when
+gpt mostly doesn't? system-prompt artifact? training distribution? if i told
+the model "plain text only, no code fences" would it stop? worth a small
+experiment when i have a quiet hour.
+
+also at some point i should try this with reasoning models. hypothesis:
+o1/o3 makes way fewer of these mundane mistakes so the applier matters less.
+would be a real result either way — either the applier is doing work that
+matters across model classes, or it's papering over a mini-model failure
+mode that the next generation kills.
 
 ## dec 13
 
@@ -46,10 +49,12 @@ on real APIs yet, dry-run looked fine. tomorrow.
 
 ## dec 14
 
-ran the eval. 0/96. all of them failed. test scoring is broken — the harness
-clones the upstream repo at base_sha but never actually installs the package,
-so pytest fails on `import requests` before even getting to my fix. for every
-trajectory. ate $5 to learn this.
+ran the eval. 0/96. all failed.
+
+took an embarrassing amount of time to figure out why: harness clones the
+upstream repo at base_sha but never installs the package. so pytest can't
+`import requests` before even getting to the agent's fix. for every
+trajectory. ate $5 to learn what one local dry-run would have caught.
 
 ## dec 16
 
