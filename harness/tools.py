@@ -120,6 +120,7 @@ def _list_files(workspace: Path, path: str = ".") -> str:
         if len(out) >= 200:
             out.append(f"... [{200} entries shown, more present]")
             break
+    # print('DEBUG _list_files:', base, len(out))  # uncomment if listing seems off
     return "\n".join(out)
 
 

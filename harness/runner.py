@@ -121,7 +121,11 @@ class Runner:
                 {"type": type(e).__name__, "msg": str(e)[:500], "model": self.model.name},
             )
 
-        # count steps from the trace (events with positive step number, of type "completion")
+        # count steps from the trace, not from a local counter. the scaffold
+        # writes the completion event before returning, so even on a mid-loop
+        # exception we get the right count of how far the agent got. a local
+        # counter would either overcount (if we increment before the event
+        # write fails) or lose the partial work entirely.
         for ev in self.trace.replay_prefix(trajectory_id, up_to_step=10_000):
             if ev["event_type"] == "completion":
                 steps_taken += 1

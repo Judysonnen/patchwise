@@ -62,6 +62,9 @@ def run_react(
                 result = tool_dispatch(tc)
             except Exception as e:
                 result = f"tool error: {type(e).__name__}: {e}"
+            # 2000 char cap on logged result so the trace db doesn't explode on
+            # huge run_tests output. the FULL result still goes to the model
+            # (via messages.append below) — only the trace log is truncated.
             trace.append(
                 trajectory_id, step, "tool_result",
                 {"call_id": tc.call_id, "name": tc.name, "result": result[:2000]},

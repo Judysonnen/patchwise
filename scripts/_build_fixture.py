@@ -86,6 +86,9 @@ def main():
     }
     (out_dir / "meta.json").write_text(json.dumps(meta, indent=2) + "\n")
 
+    # TODO: also pull the source-file before-state for offline-only fixtures.
+    # right now we lean on the harness to clone+checkout at run time. fine
+    # for evals on a connected box but slow on first run.
     print(out_dir)
 
 

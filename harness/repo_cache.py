@@ -92,6 +92,9 @@ def ensure_installed(repo: str, sha: str, repo_path: Path) -> str:
     if installed.get(key) == sha:
         return installed.get(key + "::extras", "")
 
+    # tried [test] first because that's the most common convention. [dev] is
+    # the fallback for projects (poetry, some others) that put pytest there.
+    # bare last because it almost always works but misses pytest-asyncio etc.
     last_err = ""
     for extras in ("[test]", "[dev]", ""):
         ok, err = _try_pip_install(repo_path, extras)
