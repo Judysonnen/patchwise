@@ -1,6 +1,6 @@
 # patchwise
 
-kept watching claude wrap its diffs in ```diff fences. agent fed the wrapped
+kept watching claude wrap its diffs in `` ```diff `` fences. agent fed the wrapped
 text to apply_patch, apply_patch choked on the fence, agent retried with the
 same broken output. fix one: a tolerant `apply_patch` that surfaces what's
 actually wrong (fences, line drift, truncated hunks) so the agent can react.
