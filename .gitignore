@@ -9,3 +9,5 @@ venv/
 _failure_cases_raw/
 _task_sources.txt
 trace*.sqlite*
+PROFILE_TODO.md
+*.bak*
