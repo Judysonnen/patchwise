@@ -1,13 +1,13 @@
 # patchwise
 
-started after watching LLM-generated diffs fail in mundane ways — fences around
-the body, line-number drift, hunks truncated mid-stream — and the agents would
-just retry the same broken output. so: a tolerant `apply_patch` that surfaces
-*why* a diff is broken, plus a small harness to measure whether the better
-applier actually moves anything.
+kept watching claude wrap its diffs in ```diff fences. agent fed the wrapped
+text to apply_patch, apply_patch choked on the fence, agent retried with the
+same broken output. fix one: a tolerant `apply_patch` that surfaces what's
+actually wrong (fences, line drift, truncated hunks) so the agent can react.
+fix two: a small harness to check whether the better applier actually moves
+solve rate.
 
-mostly a notebook for figuring out what matters when shipping code-modifying
-agents. not a library you'd depend on.
+scratch repo. not a library.
 
 ## what's in here
 
