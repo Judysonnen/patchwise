@@ -111,3 +111,15 @@ run on the full 12-task set once batch 2 fixtures (4 fastapi PRs) are merged
 into the harness. that bumps n from 32-per-side to 64-per-side and adds
 multi-file tasks. i'd want the multi-file scaffold gap to be more than ±3pp
 before claiming planner helps there.
+
+## may 4
+
+still haven't run the second eval pass — life. batch 2 fastapi fixtures are
+in the repo but haven't been folded into a fresh trace_run3 yet. budget for
+it next weekend if i can.
+
+also: reading back through the dec/jan notes, the bug-then-fix density in
+this repo is high. not a brag — those bugs ate >$5 of api budget combined
+to surface. the lesson is "smoke-test the harness against a known-good fix
+before spending real money on a model loop." which i already believed but
+apparently still had to learn the hard way.
