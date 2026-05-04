@@ -129,7 +129,8 @@ full breakdown in `results/run2_summary.txt`. interpretation in
 
 ## running the eval
 
-needs python 3.10+. from a clean clone:
+needs python 3.10+ and [uv](https://github.com/astral-sh/uv) (`brew install uv`
+or `curl -LsSf https://astral.sh/uv/install.sh | sh`). from a clean clone:
 
 ```bash
 uv venv --python 3.12 .venv
