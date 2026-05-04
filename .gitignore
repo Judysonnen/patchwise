@@ -7,4 +7,5 @@ venv/
 *.swp
 .DS_Store
 _failure_cases_raw/
+_task_sources.txt
 trace*.sqlite*
