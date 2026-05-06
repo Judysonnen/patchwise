@@ -12,6 +12,26 @@ whether that changes end-to-end task success.
 
 This is a focused experiment repo, not a polished end-user library.
 
+## results at a glance
+
+- fixture set: 4 tasks from a 12-task pool
+- sweep: 4 variants x 2 models x 2 trials = 64 trajectories
+- outcome: 8/64 passing trajectories overall
+- main result: tolerant tool variants passed 5/32 (15.6%) vs naive variants
+  3/32 (9.4%)
+- takeaway: on this small run, tool-layer reliability moved solve rate more
+  than the scaffold swap did
+
+| comparison | result |
+|---|---|
+| tolerant tool layer | 5 / 32 pass (15.6%) |
+| naive tool layer | 3 / 32 pass (9.4%) |
+| react scaffolds | 4 / 32 pass (12.5%) |
+| planner scaffolds | 4 / 32 pass (12.5%) |
+
+This is small-N and directional, not a strong statistical claim. Full breakdown
+is in `results/run2_summary.txt`, with interpretation in `results/run2_notes.md`.
+
 ## what's in here
 
 - `apply_patch/`: the parser and applier. structured errors (`FencedDiffError`,
