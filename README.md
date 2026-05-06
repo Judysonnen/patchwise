@@ -1,13 +1,16 @@
 # patchwise
 
-kept watching claude wrap its diffs in `` ```diff `` fences. agent fed the wrapped
-text to apply_patch, apply_patch choked on the fence, agent retried with the
-same broken output. fix one: a tolerant `apply_patch` that surfaces what's
-actually wrong (fences, line drift, truncated hunks) so the agent can react.
-fix two: a small harness to check whether the better applier actually moves
-solve rate.
+`patchwise` is a small research repo for LLM code agents: a tolerant
+`apply_patch` implementation plus an eval harness for checking whether a more
+robust tool layer actually improves solve rate.
 
-scratch repo. not a library.
+The repo started from a mundane but recurring failure mode: models would emit a
+valid-looking unified diff wrapped in `` ```diff `` fences, or drift a hunk just
+far enough that a naive applier would either choke or corrupt the target file.
+The goal here is to make those failures explicit and recoverable, then measure
+whether that changes end-to-end task success.
+
+This is a focused experiment repo, not a polished end-user library.
 
 ## what's in here
 
@@ -16,7 +19,8 @@ scratch repo. not a library.
   for a caller to retry, unwrap, or bail.
 - `harness/` — sandboxed runner. clones the upstream repo at the task's base
   SHA, applies fixture test files, hands a tool catalog to the scaffold, runs
-  the actual test command, scores success.
+  the actual test command, and scores success. supports fast subprocess runs
+  plus a Docker sandbox path with explicit resource limits.
 - `harness/scaffolds/` — `react.py` (plain ReAct loop) and `planner_executor.py`
   (planner produces a plan, executor follows it; rough — see TODOs).
 - `harness/tasks/` — 12 task fixtures pulled from real merged PRs across
