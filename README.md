@@ -1,7 +1,7 @@
 # patchwise
 
-`patchwise` is a small research repo for LLM code agents: a tolerant
-`apply_patch` implementation plus an eval harness for checking whether a more
+`patchwise` is a small research repo for LLM code agents. It has a tolerant
+`apply_patch` implementation and an eval harness for checking whether a more
 robust tool layer actually improves solve rate.
 
 The repo started from a mundane but recurring failure mode: models would emit a
@@ -14,21 +14,21 @@ This is a focused experiment repo, not a polished end-user library.
 
 ## what's in here
 
-- `apply_patch/` — the parser + applier. structured errors (`FencedDiffError`,
+- `apply_patch/`: the parser and applier. structured errors (`FencedDiffError`,
   `LineDriftError`, `PartialHunkError`, `MalformedDiffError`) with enough info
   for a caller to retry, unwrap, or bail.
-- `harness/` — sandboxed runner. clones the upstream repo at the task's base
+- `harness/`: sandboxed runner. clones the upstream repo at the task's base
   SHA, applies fixture test files, hands a tool catalog to the scaffold, runs
   the actual test command, and scores success. supports fast subprocess runs
   plus a Docker sandbox path with explicit resource limits.
-- `harness/scaffolds/` — `react.py` (plain ReAct loop) and `planner_executor.py`
+- `harness/scaffolds/`: `react.py` (plain ReAct loop) and `planner_executor.py`
   (planner produces a plan, executor follows it; rough — see TODOs).
-- `harness/tasks/` — 12 task fixtures pulled from real merged PRs across
+- `harness/tasks/`: 12 task fixtures pulled from real merged PRs across
   fastapi / httpx / requests / rich / click / poetry / urllib3. each has a
   manifest + the new test files; the agent works against the cloned upstream
   repo at `base_sha`.
-- `scripts/run_eval.py` + `scripts/analyze_results.py` — orchestration + report.
-- `results/` — eval-run summaries and notes. trace `.sqlite` files are
+- `scripts/run_eval.py` + `scripts/analyze_results.py`: orchestration + report.
+- `results/`: eval-run summaries and notes. trace `.sqlite` files are
   gitignored.
 
 ## failure modes the applier handles
@@ -57,8 +57,8 @@ model with "drop the fences."
 model generated a diff against a slightly older copy of a file. the `@@ -X,Y`
 header points at line 1 but the function actually moved to line 6 because
 someone added imports. tolerant applier searches `±20` lines around the stated
-position for the unique context window. one match → apply with a recorded
-warning. zero or multiple matches → `LineDriftError`, don't guess.
+position for the unique context window. one match applies with a recorded
+warning. zero or multiple matches return `LineDriftError`; it does not guess.
 
 ### partial hunk (response truncated mid-stream)
 
@@ -79,7 +79,7 @@ the file. tolerant raises `PartialHunkError`.
 LLMs and editors strip trailing whitespace, so blank context lines often arrive
 as `""` instead of `" "`. parser normalizes empty body lines to a single space
 so the count check, drift verify, and apply all see them as context. (this one
-took me a while to find — see `notes.md`.)
+took me a while to find; see `notes.md`.)
 
 ## results so far
 
@@ -94,16 +94,16 @@ trajectories, **8 pass**.
 | tolerant_planner | 3 / 16 | 18.8% |
 
 averaging over scaffolds, **tolerant variants pass 5/32 (15.6%) vs naive 3/32
-(9.4%)** — a ~6pp gap in the right direction. averaging over tool layers,
+(9.4%)**. that's a ~6pp gap in the right direction. averaging over tool layers,
 **react and planner are tied at 12.5%**. so on this fixture set the tool layer
 moved solve rate where the scaffold change didn't.
 
 caveats:
 
-- n is small. 6pp at 32 trajectories per side isn't statistically clean — the
+- n is small. 6pp at 32 trajectories per side isn't statistically clean. the
   95% CI on each proportion is ~±10pp. directional support, not a strong claim.
 - 4 tasks, all single-file. the scaffold-on-multi-file question is genuinely
-  unanswered — the two multi-file fixtures (`poetry_rstrip_eats_alpha_versions`,
+  unanswered. the two multi-file fixtures (`poetry_rstrip_eats_alpha_versions`,
   `httpx_iter_text_emits_empty_chunks`) aren't in this run yet.
 - model effect dominates: claude solves 6/32, gpt-4o-mini solves 2/32. wasn't
   expecting that gap.
@@ -116,19 +116,19 @@ full breakdown in `results/run2_summary.txt`. interpretation in
 - task set is small (n=4 in the eval; 12 fixtures total but 8 not yet run).
   expanding when batch 2/3 fixtures are merged in.
 - planner-executor scaffold doesn't actually constrain the executor to the
-  plan — it just puts the plan in the system prompt. on this fixture set it
+  plan. it just puts the plan in the system prompt. on this fixture set it
   reduces to "react with a plan-shaped intro" and adds zero solve rate.
   redesign so the executor walks plan steps explicitly.
 - `httpx_send_ignores_client_timeout` is 0/16 across all variants. suspect
   the test asserts both sync + async timeout paths and the agent only fixes
   one. need to look before drawing conclusions about that task.
-- harness leaks docker containers when interrupted with Ctrl+C — cleanup is
+- harness leaks docker containers when interrupted with Ctrl+C. cleanup is
   lazy. (also: docker mode is documented but the eval defaults to subprocess
   mode for speed; the docker path needs more love.)
 - haven't tried this with reasoning models (o1/o3 family) yet. hypothesis:
   reasoning models make way fewer of these mundane diff mistakes, so the
   tolerant applier matters less. would be a real result either way.
-- max_steps=20 is saturated — mean tool calls per trajectory ≈ 17. bumping
+- max_steps=20 is saturated. mean tool calls per trajectory ≈ 17. bumping
   to 30 might help on close-but-not-quite trajectories. cheap experiment.
 
 ## running the eval
